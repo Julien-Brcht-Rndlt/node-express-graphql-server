@@ -10,8 +10,17 @@ const schema = buildSchema(`
     },
     type Mutation {
         updateCourseTopic(id: Int!, topic: String): Course
+        createCourse(courseInput: CourseInput!): [Course]
     }
     type Course {
+        id: Int
+        title: String
+        author: String
+        description: String
+        topic: String
+        url: String
+    }
+    input CourseInput {
         id: Int
         title: String
         author: String
@@ -57,10 +66,15 @@ const getCourse = (args) => {
 }
 
 const getCourses = (args) => {
-    if(!args.topic) {
+    if(!args.topic && !args.title) {
         return coursesData;
+    } else if(args.topic && args.title) {
+        return coursesData.filter(course => course.topic === args.topic && course.title === args.title);
+    } else if(args.topic) {
+        return coursesData.filter(course => course.topic === args.topic);
+    } else if (args.title) {
+        return coursesData.filter(course => course.title === args.title);
     }
-    return coursesData.filter(course => course.topic === args.topic);
 }
 
 const updateCourseTopic = ({id, topic}) => {
@@ -73,11 +87,17 @@ const updateCourseTopic = ({id, topic}) => {
  return coursesData.find(course => course.id == id);
 }
 
+const createCourse = ({ courseInput }) => {
+    coursesData.push(courseInput);
+    return coursesData;
+}
+
 // Root
 const root = {
     course: getCourse,
     courses: getCourses,
     updateCourseTopic: updateCourseTopic,
+    createCourse: createCourse,
 }
 
 // Create GraphQL endpoint
